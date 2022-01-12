@@ -47,6 +47,8 @@ jobs:
       TARGET_DIR: ./target
       # Get backtraces on panics.
       RUST_BACKTRACE: 1
+      # Turn incremental compilation off (takes extra time and does not work with ci)
+      CARGO_INCREMENTAL: 0
     strategy:
       matrix:
         build: [linux, win-msvc, win32-msvc]
