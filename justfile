@@ -9,7 +9,7 @@ clippy:
 
 # Checks the formatting
 checkfmt:
-	cargo fmt --locked --all -- --check
+	cargo fmt --all -- --check
 
 # Checks clippy and formatting
 lint: clippy checkfmt
