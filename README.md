@@ -2,18 +2,39 @@
 
 ## Setup (Clone)
 
-1) Reset the repository
+Reset the repository
 
 ```bash
 rm -rf .git
 git init
 ```
-2) Init cargo project
+
+### Library
+
+1) Init cargo project
 
 ```bash
 cargo init --lib
-# OR
+```
+
+2) Remove the release ci
+
+```bash
+rm .github/workflows/release.yaml
+```
+
+3) Remove the install command from `justfile`
+
+### Binary
+
+1) Init cargo project
+
+```bash
 cargo init --bin
 ```
 
-3) If it is a binary, create `src/main.rs`
+2) Create `src/main.rs`.
+
+```bash
+echo 'fn main() {}' > src/main.rs
+```
