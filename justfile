@@ -30,7 +30,7 @@ clean:
 
 # Crate compile timings
 timings: clean
-	cargo +nightly build -Z timings --release
+	cargo build --timings --release
 
 # Runs everything important
 all: lint test
