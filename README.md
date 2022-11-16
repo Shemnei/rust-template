@@ -38,3 +38,8 @@ cargo init --bin
 ```bash
 echo 'fn main() {}' > src/main.rs
 ```
+
+### Finally
+
+As a last options you can have a look at [`Cargo.template.toml`](./Cargo.template.toml) to see if any
+of the options suit the project.
