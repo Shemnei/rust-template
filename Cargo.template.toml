@@ -1,0 +1,18 @@
+# For more information why options are chosen or further optimizations see <https://nnethercote.github.io/perf-book/title-page.html>.
+# The default values for profile can be viewed here: <https://doc.rust-lang.org/cargo/reference/profiles.html>
+
+[profile.release]
+## Link-time optimizations
+# `true` is an alias for `fat`
+# `thin` can be an alternative with similar results to `fat` but better compile times
+lto = "fat"
+
+## Codegen units
+# `1` can allow for better optimizations (as parallelism might skip some
+# optimizations) but leads to increased compile times.
+codegen-units = 1
+
+## Strip
+# Strips the resulting binary of any symbols and debuginfo to decreases final
+# binary size.
+strip = true
