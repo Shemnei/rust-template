@@ -36,3 +36,9 @@ timings: clean
 all: lint test
 
 alias cic := all
+
+# Checks for outdated dependencies
+#
+# REQUIRES: cargo-edit
+outdated:
+	cargo upgrade --dry-run
