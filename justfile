@@ -34,3 +34,5 @@ timings: clean
 
 # Runs everything important
 all: lint test
+
+alias cic := all
