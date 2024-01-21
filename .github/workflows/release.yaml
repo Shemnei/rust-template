@@ -62,15 +62,21 @@ jobs:
         include:
           - build: linux
             os: ubuntu-latest
-            rust: nightly
+            rust: stable
             target: x86_64-unknown-linux-musl
           - build: win-msvc
             os: windows-latest
-            rust: nightly
+            rust: stable
             target: x86_64-pc-windows-msvc
+          - build: win-msvc-static
+            os: windows-latest
+            rust: stable
+            target: x86_64-pc-windows-msvc
+            features: windows-static
+            name: x86_64-pc-windows-msvc-static
           - build: win32-msvc
             os: windows-latest
-            rust: nightly
+            rust: stable
             target: i686-pc-windows-msvc
     steps:
       - name: Checkout repository

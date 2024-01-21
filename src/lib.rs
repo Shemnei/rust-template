@@ -12,7 +12,6 @@
 	future_incompatible,
 	missing_copy_implementations,
 	missing_debug_implementations,
-	private_in_public,
 	rust_2018_compatibility,
 	rust_2018_idioms,
 	trivial_casts,
