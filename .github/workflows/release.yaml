@@ -2,16 +2,24 @@
 # - https://eugene-babichenko.github.io/blog/2020/05/09/github-actions-cross-platform-auto-releases/
 # - https://github.com/BurntSushi/ripgrep/blob/master/.github/workflows/release.yml
 
+name: Release
+
 on:
   push:
     tags:
       - 'v[0-9]+.*'
 
-name: Release
+# Only allow a single release at a time.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   create-release:
-    name: Create release
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.release.outputs.upload_url }}
@@ -22,8 +30,9 @@ jobs:
         run: |
           # Get the version from github tag
           # See: https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/m-p/32167/highlight/true#M1027
-          echo "PROJECT_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+          echo "PROJECT_VERSION=${GITHUB_REF#refs/tags/v}" >> "${GITHUB_ENV}"
           echo "Version: ${{ env.PROJECT_VERSION }}"
+
       - name: Create release
         id: release
         uses: actions/create-release@v1
@@ -32,10 +41,8 @@ jobs:
         with:
           tag_name: "v${{ env.PROJECT_VERSION }}"
           release_name: ${{ env.PROJECT_VERSION }}
-          draft: true
 
   build-release:
-    name: Build release
     needs: ['create-release']
     runs-on: ${{ matrix.os }}
     env:
@@ -74,27 +81,31 @@ jobs:
         run: |
           sudo apt-get update -y
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: ${{ matrix.rust }}
-          override: true
           target: ${{ matrix.target }}
 
-      - name: Setup Cross
-        shell: bash
+      - name: Setup cross
         run: |
           cargo install cross
-          echo "CARGO=cross" >> $GITHUB_ENV
-          echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
-          echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
+          {
+            echo "CARGO=cross"
+            echo "TARGET_FLAGS=--target ${{ matrix.target }}"
+            echo "TARGET_DIR=./target/${{ matrix.target }}"
+          } >> "${GITHUB_ENV}"
+
+      - name: Set crate name
+        run: |
+          echo "CRATE_NAME=$(grep "name" Cargo.toml | awk -F'=' '{print $2}' | tr -d ' "')" >> "${GITHUB_ENV}"
 
       - name: Log env
         run: |
-          echo "cargo: ${{ env.CARGO }}"
-          echo "target flags: ${{ env.TARGET_FLAGS }}"
-          echo "target dir: ${{ env.TARGET_DIR }}"
+          echo "Crate: ${{ env.CRATE_NAME }}"
+          echo "Cargo: ${{ env.CARGO }}"
+          echo "Target flags: ${{ env.TARGET_FLAGS }}"
+          echo "Target dir: ${{ env.TARGET_DIR }}"
 
       - name: Build release binary
         run: |
@@ -103,23 +114,24 @@ jobs:
       - name: Build archive
         shell: bash
         run: |
-          staging="punktf-${{ matrix.target }}"
-          mkdir -p "$staging"
+          suffix="${{ matrix.name }}"
+          staging="${{ env.CRATE_NAME }}-${suffix:-${{ matrix.target }}}"
+          mkdir -p "${staging}"
 
           if [[ "${{ matrix.os }}" = "windows-latest" ]]; then
             echo "Archiving windows build"
-            cp "${{ env.TARGET_DIR }}/release/punktf.exe" "$staging/"
-            7z a "$staging.zip" "$staging"
-            echo "ASSET=$staging.zip" >> $GITHUB_ENV
+            cp "${{ env.TARGET_DIR }}/release/${{ env.CRATE_NAME }}.exe" "${staging}/"
+            7z a "${staging}.zip" "${staging}"
+            echo "ASSET=${staging}.zip" >> "${GITHUB_ENV}"
           else
             echo "Archiving unix build"
-            cp "${{ env.TARGET_DIR }}/release/punktf" "$staging/"
-            tar czf "$staging.tar.gz" "$staging"
-            echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
+            cp "${{ env.TARGET_DIR }}/release/${{ env.CRATE_NAME }}" "${staging}/"
+            tar czf "${staging}.tar.gz" "${staging}"
+            echo "ASSET=${staging}.tar.gz" >> "${GITHUB_ENV}"
           fi
 
       - name: Upload archive
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

@@ -1,6 +1,13 @@
 # For more information why options are chosen or further optimizations see <https://nnethercote.github.io/perf-book/title-page.html>.
 # The default values for profile can be viewed here: <https://doc.rust-lang.org/cargo/reference/profiles.html>
 
+[package]
+name = "rust-template"
+version = "0.0.0"
+edition = "2021"
+publish = false
+license = "Unlicense"
+
 [profile.release]
 ## Link-time optimizations
 # `true` is an alias for `fat`
